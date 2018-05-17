@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script src="./require.js"></script>
+<script> 
+	var mysql = require(['mysql']);
+    function SHOW(){
+	   var con = mysql.createConnection({
+			host: XXXXX,
+			user: XXXXX,
+			password: XXXXX,
+			database: XXXXX,
+			port: XXXXX
+		});   
+		con.connect(function(err) {
+		  	if(err) throw err;	
+		  	console.log("Connected!");
+
+		  	var sql = "SELECT * FROM `tessel` ORDER BY `Time` DESC LIMIT 1";
+
+		  	con.query(sql, function (err, result) {
+		  		if (err) throw err;
+				console.log(result);
+				document.getElementById("data").innerHTML=result;
+	            con.end();
+		  	});
+		});
+    }
+    window.setInterval('SHOW()',1000);
+ 
+    window.onload = function () {
+
+	var dps = []; // dataPoints
+	var chart = new CanvasJS.Chart("chartContainer", {
+		title :{
+			text: "soilHumidity"
+		},
+		axisY: {
+			includeZero: false
+		},      
+		data: [{
+			type: "line",
+			dataPoints: dps
+		}]
+	});
+
+	var xVal = 0;
+	var yVal = 100; 
+	var updateInterval = 2000;
+	var dataLength = 10; // number of dataPoints visible at any point
+
+	var updateChart = function (count) {
+			var year = new Date().getFullYear();
+	        var month = new Date().getMonth()+1;
+	        var day = new Date().getDate();
+	        var hour = new Date().getHours()+8;
+	        var minute = new Date().getMinutes();	
+	        var second = new Date().getSeconds();
+	        var time = year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second;
+
+		count = count || 1;
+
+		for (var j = 0; j < count; j++) {
+			yVal = 3.3*Math.random() ;
+			document.getElementById("data").innerHTML=yVal.toFixed(2);
+			dps.push({
+				x: xVal,
+				y: yVal
+			});
+			xVal++;
+		}
+
+		if (dps.length > dataLength) {
+			dps.shift();
+		}
+
+		chart.render();
+	};
+
+	updateChart(dataLength);
+	setInterval(function(){updateChart()}, updateInterval);
+
+	}          
+</script>
+
+</head>
+<body>
+
+<h1>Lec 2</h1>
+
+<div id="chartContainer" style="height: 500px; width: 100%;"></div>
+<div >The Latest Information: </div>
+<div id='data'> </div>
+</body>
+</html>

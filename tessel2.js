@@ -1,21 +1,27 @@
 const tessel = require('tessel');
 const http = require('http');
 const axios = require('axios');
-
-// analogPin: 4
 var pin = tessel.port.B.pin[4];
 
 setInterval(() => {
-    pin.analogRead((error,number)=>{
-            if(error){
-                throw error;
-            }
-            var urlreq =  'http://192.168.1.210:3000/test?username={0}'.format(number);
-            axios.get(urlreq);
-            // console.log(number);
-        })
-    }, 1000);
+    pin.analogRead((error,value)=>{
+            if(error) throw error;
 
-// 傳送GET request至該ip位址
+ 			var year = new Date().getFullYear();
+            var month = new Date().getMonth()+1;
+            var day = new Date().getDate();
+            var hour = new Date().getHours()+8;
+            var minute = new Date().getMinutes();	
+            var second = new Date().getSeconds();
+            var time = year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second;
+			console.log(time+" "+value);
+            
+            if (value > 0.5) tessel.led[2].toggle();
+         
+            var urlreq =  'http://192.168.2.101:3000/test?time='+time+"&soilHumidity="+value;
+            axios.get(urlreq);
+                
+        })
+}, 1000);
 
 
